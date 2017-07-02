@@ -1,0 +1,12 @@
+--- # Configuring Hostname
+- name: Configure Hostnames 
+  hosts: minions
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: no
+  
+  tasks:
+  - name: Create file from template and copy it to remote servers 
+    template: src=hosts.j2 dest=/etc/sysconfig/network

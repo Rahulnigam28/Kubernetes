@@ -1,0 +1,24 @@
+--- # Configuring Minions
+- hosts: minion1, minion2, minion3, minion4
+  become: yes
+  become_method: sudo
+  connection: ssh
+  remote_user: ansible
+  gather_facts: no
+ 
+  tasks:
+  - name: Configure Kubernetes system config
+    copy: src=Script_Templates/Minions/config.j2 dest=/etc/kubernetes/config
+
+  - name: Configure Kubelet
+    template: src=Script_Templates/Minions/kubelet.j2 dest=/etc/kubernetes/kubelet
+   
+  - name: Starting Services
+    systemd:
+       name: '{{item}}'
+       enabled: yes
+       state: restarted
+    with_items:
+       - kube-proxy
+       - kubelet
+       - docker

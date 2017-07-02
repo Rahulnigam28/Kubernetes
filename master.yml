@@ -1,0 +1,29 @@
+--- # Master Configuration YAML
+- hosts: server
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: no
+   
+  tasks:
+  - name: Kubernetes System Config
+    template: src=Script_Templates/Master/k8_config.j2 dest=/etc/kubernetes/config
+  
+  - name: etcd.config
+    template: src=Script_Templates/Master/etcd.conf.j2 dest=/etc/etcd/etcd.conf
+ 
+  - name: Kubernetes Apiserver
+    template: src=Script_Templates/Master/kubernetes_apiserver.j2 dest=/etc/kubernetes/apiserver
+  
+  - name: Enabling services
+    systemd:      
+       name: '{{ item }}'
+       enabled: yes
+       state: restarted
+    with_items: 
+          -   etcd
+          -   kube-apiserver
+          -   kube-controller-manager   
+          -   kube-scheduler
+       

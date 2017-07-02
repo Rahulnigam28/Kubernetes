@@ -1,0 +1,43 @@
+--- # configure Kubernetes minions and nodes
+- hosts: minions
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: no
+
+  
+  tasks:
+  - name:  Install NTP package
+    yum:
+       name: ntp
+       state: latest
+    notify: enable ntp
+    
+#   handlers:  # indicates a conditional task
+  - name: enable ntp  # name of the notification event linked to this task 
+    service: #service module
+          name: ntpd  
+          enabled: yes
+          state: started
+   
+  - name: Configure virt7-docker-common-release.repo
+    copy:
+        src: virt7-docker-common-release
+        dest: /etc/yum.repos.d/virt7-docker-common-release.repo
+        force: yes # will copy if there is change in source file, default behaviour
+    
+  - name: update yum
+    yum:
+        state: latest
+        name: '*'
+        update_cache: yes
+   
+  - name: Install Packages Kubernetes, ETCD, Docker, Flannel
+    yum:
+        enablerepo: virt7-docker-common-release
+        name: [kubernetes, docker, flannel, etcd]
+        state: latest 
+
+    
+
